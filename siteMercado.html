@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarketFlow • Gestão de Estoque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 4rem;
+    }
+
+    .top-banner {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+      color: white;
+      padding: 2.5rem 1.5rem 5.5rem;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .brand h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .brand p {
+      color: #c7d2fe;
+      font-size: 0.92rem;
+      margin-top: 0.25rem;
+    }
+
+    .api-box {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.5rem;
+      border-radius: 12px;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .api-box input {
+      background: rgba(255, 255, 255, 0.95);
+      border: none;
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      flex: 1;
+      outline: none;
+    }
+
+    .api-box button {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .api-box button:hover {
+      background: #059669;
+    }
+
+    .main-content {
+      margin-top: -3.5rem;
+      padding: 0 1.5rem;
+    }
+
+    /* Aviso de status da conexão */
+    .alert-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 0.9rem 1.2rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      font-size: 0.88rem;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.5rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .kpi-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .kpi-info span {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-info h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 0.15rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      margin-bottom: 1.75rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      padding: 0.7rem 0.95rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      color: var(--text-main);
+      background-color: #fff;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      padding: 0.7rem 1.35rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: #f1f5f9;
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input {
+      min-width: 220px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.88rem;
+    }
+
+    .filter-bar select {
+      padding: 0.55rem 0.9rem;
+      font-size: 0.88rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.95rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .cat-mercearia { background: #fef3c7; color: #92400e; }
+    .cat-hortifruti { background: #dcfce7; color: #166534; }
+    .cat-frios { background: #e0f2fe; color: #075985; }
+    .cat-bebidas { background: #f3e8ff; color: #6b21a8; }
+    .cat-limpeza { background: #cffafe; color: #155e75; }
+    .cat-padaria { background: #ffedd5; color: #9a3412; }
+
+    .stock-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .stock-ok .dot { background: #10b981; }
+    .stock-ok { color: #065f46; }
+    .stock-low .dot { background: #ef4444; }
+    .stock-low { color: #b91c1c; background: #fef2f2; padding: 0.2rem 0.6rem; border-radius: 6px; }
+
+    .action-btns {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+      color: var(--text-muted);
+    }
+
+    .icon-btn.edit:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: #c7d2fe;
+    }
+
+    .icon-btn.del:hover {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fecaca;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state span {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    .toast.success { border-left: 4px solid #10b981; }
+    .toast.error { border-left: 4px solid #ef4444; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-banner">
+    <div class="container header-content">
+      <div class="brand">
+        <h1>🛍️ MarketFlow</h1>
+        <p>Painel de controle de estoque integrado via CrudCrud REST API</p>
+      </div>
+      <div class="api-box">
+        <input type="text" id="apiUrl" placeholder="Cole sua URL do crudcrud.com/api/..." />
+        <button type="button" onclick="salvarEndpoint()">Conectar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container main-content">
+    
+    <div id="alert-box" class="alert-box"></div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: #eef2ff; color: #4f46e5;">📦</div>
+        <div class="kpi-info">
+          <span>Total de Produtos</span>
+          <h2 id="kpi-itens">0</h2>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: #ecfdf5; color: #059669;">💰</div>
+        <div class="kpi-info">
+          <span>Valor em Estoque</span>
+          <h2 id="kpi-valor">R$ 0,00</h2>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background: #fef2f2; color: #dc2626;">⚠️</div>
+        <div class="kpi-info">
+          <span>Estoque Baixo (menor que 5)</span>
+          <h2 id="kpi-baixo">0</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title" id="form-title">✨ Cadastrar Novo Produto</h3>
+      </div>
+      <form id="produtoForm">
+        <input type="hidden" id="produtoId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="nome">Nome do Produto</label>
+            <input type="text" id="nome" placeholder="Ex: Café Torrado 500g" required>
+          </div>
+          <div class="form-group">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" required>
+              <option value="Mercearia">Mercearia</option>
+              <option value="Hortifruti">Hortifruti</option>
+              <option value="Frios e Laticínios">Frios e Laticínios</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Limpeza">Limpeza</option>
+              <option value="Padaria">Padaria</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="preco">Preço Unitário (R$)</label>
+            <input type="number" id="preco" step="0.01" min="0" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label for="quantidade">Quantidade</label>
+            <input type="number" id="quantidade" min="0" placeholder="0" required>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="btnCancelar" style="display: none;" onclick="cancelarEdicao()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSalvar">+ Adicionar ao Estoque</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">📋 Inventário Atual</h3>
+        <div class="filter-bar">
+          <input type="text" id="busca" placeholder="🔍 Buscar produto..." oninput="filtrarTabela()">
+          <select id="filtroCategoria" onchange="filtrarTabela()">
+            <option value="">Todas as categorias</option>
+            <option value="Mercearia">Mercearia</option>
+            <option value="Hortifruti">Hortifruti</option>
+            <option value="Frios e Laticínios">Frios e Laticínios</option>
+            <option value="Bebidas">Bebidas</option>
+            <option value="Limpeza">Limpeza</option>
+            <option value="Padaria">Padaria</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Categoria</th>
+              <th>Preço Unit.</th>
+              <th>Subtotal</th>
+              <th>Estoque</th>
+              <th style="text-align: right;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaProdutos">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <span>🔌</span>
+                  Cole o endpoint do CrudCrud no topo da página e clique em Conectar.
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast-container"></div>
+
+<script>
+  let listaProdutosCache = [];
+
+  const apiInput = document.getElementById('apiUrl');
+  const form = document.getElementById('produtoForm');
+  const tabela = document.getElementById('tabelaProdutos');
+  const alertBox = document.getElementById('alert-box');
+
+  // Avisa caso o usuário esteja abrindo via file:// (que costuma bloquear PUT/DELETE por CORS)
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.location.protocol === 'file:') {
+      mostrarAlerta(
+        '.'
+      );
+    }
+
+    const savedUrl = localStorage.getItem('crudcrud_endpoint');
+    if (savedUrl) {
+      apiInput.value = savedUrl;
+      listarProdutos();
+    }
+  });
+
+  function mostrarAlerta(html) {
+    alertBox.innerHTML = html;
+    alertBox.style.display = 'block';
+  }
+
+  function showToast(msg, tipo = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    toast.innerHTML = `<span>${tipo === 'success' ? '✅' : '❌'}</span> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      toast.style.transition = 'all 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
+
+  // Normaliza a URL para sempre terminar em /produtos
+  function getEndpointUrl() {
+    let url = apiInput.value.trim();
+    if (!url) return '';
+    url = url.replace(/\/+$/, ''); // remove barras no final
+    if (!url.endsWith('/produtos')) {
+      url += '/produtos';
+    }
+    return url;
+  }
+
+  function salvarEndpoint() {
+    const raw = apiInput.value.trim();
+    if (!raw.includes('crudcrud.com/api/')) {
+      showToast('Cole uma URL válida gerada no site crudcrud.com', 'error');
+      return;
+    }
+    localStorage.setItem('crudcrud_endpoint', raw);
+    listarProdutos();
+  }
+
+  // GET - Listar todos
+  async function listarProdutos() {
+    const endpoint = getEndpointUrl();
+    if (!endpoint) return;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}: Verifique se o seu endpoint do CrudCrud expirou (dura 24h ou 100 requisições).`);
+      }
+      
+      listaProdutosCache = await response.json();
+      atualizarKPIs(listaProdutosCache);
+      filtrarTabela();
+      showToast('Conectado ao CrudCrud!');
+    } catch (error) {
+      console.error('Erro GET:', error);
+      showToast('Falha na conexão. Verifique o console ou gere um novo link no crudcrud.com.', 'error');
+    }
+  }
+
+  function atualizarKPIs(produtos) {
+    const totalItens = produtos.length;
+    const valorTotal = produtos.reduce((acc, p) => acc + (Number(p.preco) * Number(p.quantidade)), 0);
+    const estoqueBaixo = produtos.filter(p => Number(p.quantidade) < 5).length;
+
+    document.getElementById('kpi-itens').textContent = totalItens;
+    document.getElementById('kpi-valor').textContent = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('kpi-baixo').textContent = estoqueBaixo;
+  }
+
+  function filtrarTabela() {
+    const termo = document.getElementById('busca').value.toLowerCase();
+    const cat = document.getElementById('filtroCategoria').value;
+
+    const filtrados = listaProdutosCache.filter(p => {
+      const matchNome = (p.nome || '').toLowerCase().includes(termo);
+      const matchCat = cat === '' || p.categoria === cat;
+      return matchNome && matchCat;
+    });
+
+    renderizarTabela(filtrados);
+  }
+
+  function getBadgeClass(categoria) {
+    const map = {
+      'Mercearia': 'cat-mercearia',
+      'Hortifruti': 'cat-hortifruti',
+      'Frios e Laticínios': 'cat-frios',
+      'Bebidas': 'cat-bebidas',
+      'Limpeza': 'cat-limpeza',
+      'Padaria': 'cat-padaria'
+    };
+    return map[categoria] || 'cat-mercearia';
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function renderizarTabela(produtos) {
+    if (produtos.length === 0) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <span>📭</span>
+              Nenhum produto encontrado no estoque.
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tabela.innerHTML = produtos.map(prod => {
+      const preco = Number(prod.preco) || 0;
+      const qtd = Number(prod.quantidade) || 0;
+      const subtotal = preco * qtd;
+      const isLow = qtd < 5;
+
+      return `
+        <tr>
+          <td><strong>${escapeHtml(prod.nome)}</strong></td>
+          <td><span class="badge ${getBadgeClass(prod.categoria)}">${escapeHtml(prod.categoria)}</span></td>
+          <td>${preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+          <td style="color: var(--text-muted); font-weight: 500;">${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+          <td>
+            <span class="stock-pill ${isLow ? 'stock-low' : 'stock-ok'}">
+              <span class="dot"></span>
+              ${qtd} un. ${isLow ? '• Repor' : ''}
+            </span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button type="button" class="icon-btn edit" onclick="prepararEdicao('${prod._id}')">✏️ Editar</button>
+              <button type="button" class="icon-btn del" onclick="deletarProduto('${prod._id}')">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // POST & PUT
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const endpoint = getEndpointUrl();
+    if (!endpoint) {
+      showToast('Cole e conecte sua URL do CrudCrud primeiro!', 'error');
+      return;
+    }
+
+    const btnSalvar = document.getElementById('btnSalvar');
+    btnSalvar.disabled = true;
+
+    const id = document.getElementById('produtoId').value;
+    const payload = {
+      nome: document.getElementById('nome').value.trim(),
+      categoria: document.getElementById('categoria').value,
+      preco: parseFloat(document.getElementById('preco').value),
+      quantidade: parseInt(document.getElementById('quantidade').value, 10)
+    };
+
+    try {
+      if (id) {
+        // PUT - Atualiza registro existente
+        const response = await fetch(`${endpoint}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`Erro HTTP ${response.status} ao atualizar.`);
+        showToast('Produto atualizado com sucesso!');
+      } else {
+        // POST - Cria novo registro
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`Erro HTTP ${response.status} ao cadastrar.`);
+        showToast('Produto adicionado ao estoque!');
+      }
+
+      cancelarEdicao();
+      await listarProdutos();
+    } catch (error) {
+      console.error('Erro POST/PUT:', error);
+      showToast('Erro ao salvar. Se abriu via file://, use um servidor local (Live Server).', 'error');
+    } finally {
+      btnSalvar.disabled = false;
+    }
+  });
+
+  // Busca o produto no cache pelo _id (evita quebra de aspas no HTML)
+  function prepararEdicao(id) {
+    const produto = listaProdutosCache.find(p => p._id === id);
+    if (!produto) return;
+
+    document.getElementById('produtoId').value = produto._id;
+    document.getElementById('nome').value = produto.nome;
+    document.getElementById('categoria').value = produto.categoria;
+    document.getElementById('preco').value = produto.preco;
+    document.getElementById('quantidade').value = produto.quantidade;
+
+    document.getElementById('form-title').textContent = '✏️ Editando Produto';
+    document.getElementById('btnSalvar').textContent = 'Salvar Alterações';
+    document.getElementById('btnCancelar').style.display = 'inline-flex';
+    document.getElementById('nome').focus();
+    window.scrollTo({ top: 100, behavior: 'smooth' });
+  }
+
+  function cancelarEdicao() {
+    form.reset();
+    document.getElementById('produtoId').value = '';
+    document.getElementById('form-title').textContent = '✨ Cadastrar Novo Produto';
+    document.getElementById('btnSalvar').textContent = '+ Adicionar ao Estoque';
+    document.getElementById('btnCancelar').style.display = 'none';
+  }
+
+  // DELETE
+  async function deletarProduto(id) {
+    if (!confirm('Deseja realmente excluir este item do estoque?')) return;
+    
+    const endpoint = getEndpointUrl();
+    try {
+      const response = await fetch(`${endpoint}/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error(`Erro HTTP ${response.status} ao excluir.`);
+      
+      showToast('Item removido do estoque.');
+      await listarProdutos();
+    } catch (error) {
+      console.error('Erro DELETE:', error);
+      showToast('Erro ao excluir. Verifique se está rodando via servidor HTTP (ex: Live Server).', 'error');
+    }
+  }
+</script>
+
+</body>
+</html>
